@@ -1,4 +1,4 @@
-# DataStructure-Review-I(please read in raw style)
+# DataStructure-Review-I(please read in Raw style)
 In this section, we will go over the DS
 included:
 
