@@ -90,3 +90,344 @@ public class Solution2 {
     }
   }
 }
+
+2. Search element in sorted Matrix
+/*
+Given a 2D matrix that contains integers only, which each row is sorted in an ascending order. 
+The first element of next row is larger than (or equal to) the last element of previous row.
+Given a target number, returning the position that the target locates within the matrix. If the target number does not exist in the matrix, return {-1, -1}.
+Assumptions:
+The given matrix is not null, and has size of N * M, where N >= 0 and M >= 0.
+Examples:
+
+matrix = { {1, 2, 3}, {4, 5, 7}, {8, 9, 10} }
+
+target = 7, return {1, 2}
+
+target = 6, return {-1, -1} to represent the target number does not exist in the matrix.
+*/
+
+High level:
+Just need to transfer the format from matrix to 1D int array
+and then conduct binary search in the transforming format;
+for each mid position:
+use matrix[mid / col][mid % col] to represent the element in the matrix;
+public class Solution {
+ public int[] search(int[][] matrix, int target) {
+   if (matrix.length == 0 || matrix[0].length == 0) {
+      return new int[]{-1, -1};
+   }
+    int row = matrix.length;
+    int col = matrix[0].length;
+    int left = 0;
+    int right = row * col - 1;
+    while (left < right - 1) {
+      int mid = left + (right - left) / 2;
+      int r = mid / col;
+      int c = mid % col;
+      if (matrix[r][c] < target) {  
+        left = mid + 1;
+      } else if (matrix[r][c] > target) {
+        right = mid - 1;
+      } else {
+        return new int[]{r, c};
+      } 
+    }
+    //post-processing:
+    if (matrix[right / col][right % col] == target) {
+      return new int[]{right / col, right % col};
+    } else if (matrix[left / col][left % col] == target) {
+      return new int[]{left / col, left % col};
+    }
+    return new int[] {-1, -1};
+ }
+}
+
+3. Find K smallest elements in the sorted array;
+//assumption：k must smaller than the length of array && k >= 0;
+
+High level:
+find the largestSmallerEqual element index first
+then use the index as left -> int left = helper();
+int right = left + 1;
+use a int[] array = new int[k] to store the target elements
+then traverse the array in two directions until fill in all the cell in the array;
+
+public class Solution {
+ public int[] kClosest(int[] array, int target, int k) {
+   int[] result = new int[k];
+   if (array.length == 0 || k == 0){
+     return new int[0];
+   }
+   int left = largestSmallerEqual(array, target);
+   int right = left + 1;
+   /*
+   for (int i = 0; i < k; i++) {
+     if (right > array.length - 1 ||
+     left >= 0 && target - array[left] <= array[right] - target) {
+       result[i] = array[left--];
+     } else {
+       result[i] = array[right++];
+     }
+   }
+   */
+   //必须要把right不能被动index OutofBound也考虑进来
+   int i = 0;
+   while (k > 0) {
+      if (right > array.length - 1 || left >= 0 && target - array[left]
+     <= array[right] - target) {
+        result[i++] = array[left--];
+      } else {
+        result[i++] = array[right++];
+      }
+     k--;
+    }
+   return result;
+ }
+ 
+ private int largestSmallerEqual(int[] array, int target) {
+   int left = 0;
+   int right = array.length - 1;
+   while(left < right - 1) {
+     int mid = left + (right - left) / 2;
+     if (array[mid] <= target) {
+       left = mid;
+     }
+     else if(array[mid] > target) {
+       right = mid - 1;
+     }
+   }
+   if (array[right] <= target) {
+     return right;
+   } else if (array[left] <= target) {
+     return left;
+   }
+   //这个有可能会落空找不到撒
+   return -1;
+ }
+}
+ 
+/*Kclosest中总是忘记考虑k == 0的情况；另外要注意循环的条件：
+T: O(logn + k)
+S: O(1) 不算输出的话语
+
+4.Search in unknown sized sorted array
+/*
+*  interface Dictionary {
+*    public Integer get(int index);
+*  }
+*/
+ 
+// You do not need to implement the Dictionary interface.
+// You can use it directly, the implementation is provided when testing your solution.
+
+
+High level:
+double sized the searching range from 0 and 1(starts with size == 1);
+until we can fix the final searching range(target must exist in the searching range or not exist)
+use classical binary search find the target in the final searching range
+
+public class Solution {
+ public int search(Dictionary dict, int target) {
+   //T: O(log n); double 对折法；
+   //S: O(1);
+   //for this quesiton what I can do is to use two pointers
+   //and testify if any one of the index is already equal to null;
+   //and this value can not be exceed target
+   int left = 0;
+   int right = 1;
+   while(dict.get(right) != null && dict.get(right) < target){
+     left = right;
+     right = 2 * right;
+   }
+   return classicalBinarySearch(dict, target, left, right);
+ }
+ 
+ private int classicalBinarySearch(Dictionary dict, int target, int left, int right){
+   while(left <= right){
+     int mid = left + (right - left) / 2;
+     if(dict.get(mid) == null ||dict.get(mid) > target){
+       right = mid - 1;
+     } else if(dict.get(mid) < target){
+       left = mid + 1;
+     } else {
+       return mid;
+     }
+   }
+   //循环全部结束咋办呢？
+   //返回-1回家吃饭；
+   return -1;
+ }
+}
+   /*
+   return classicalBinarySearch(dict, target, left, right);
+ }
+ 
+ 
+5. Smallest Rectangle in Black Pixels
+/*
+An image is represented by a binary matrix with 0 as a white pixel and 1 as a black pixel.
+The black pixels are connected, i.e., there is only one black region.
+Pixels are connected horizontally and vertically. Given the location (x, y) of one of the black pixels,
+return the area of the smallest (axis-aligned) rectangle that encloses all black pixels.
+
+For example, given the following image:
+[
+ "0010",
+ "0110",
+ "0100"
+]
+and x = 0, y = 2,
+Return 6.
+*/
+
+//assumption:
+//image is not null or empty,
+//x must in the range of[0, image.length - 1];
+//y must in the range of[0, image[0].length - 1];
+//output: int result
+//High level:
+//started from given position (x, y)
+//check the upper boundary and the lower boundary
+//also check the left boundary and right boundary
+
+//Details:
+//for the upper row, started from (0, x) and the first non-black pixel row must exist
+//between (0,x), so use binary Search to find mid row then scan from the col = 0 to col = image[0].length - 1
+//if still don't find any black pixel yet, binary search to find the row range from [mid + 1, x]
+//if do find black pixel, binarySearch to find the row range from [0, mid]
+
+//for the bottom row, started from(x, image.length - 1), the only difference is the directions change
+//when black pixel got it, binarySearch find row range from [mid, image.length - 1];
+//else if haven't got black pixel, binarySearch find row range from[x, mid - 1];
+
+//as for left/right Boundary, I can use the same logic to binary Search find the minY and maxY;
+//because there are 4 parts of logic areas,
+//if only allowed using one method, just use two boolean variable to determine its directions.
+
+T: O(nlogm + mlogn) if m is >> n then → mlogn
+                         else if  n  is >> m then → nlogm;
+S: O(1);
+ private static int getResultBinarySearch(int[][] image, int x, int y) {
+   int res = Integer.MIN_VALUE;
+   if (image == null || image.length == 0 || image[0].length == 0) {
+       return res;
+   }
+   int row = image.length;
+   int col = image[0].length;
+   //res的物理意义是为了求出他的rectangle area
+   //那么要做的，就是把它的变长计算出来
+   int minX = getLimitation(image, true, true, 0, x, 0, col);
+   int maxX = getLimitation(image, true, false, x + 1, row, 0, col);
+   int minY = getLimitation(image, false, true, 0, y, minX, maxX);
+   int maxY = getLimitation(image, false, false, y + 1, col, minX, maxX);
+   res = (maxY - minY) * (maxX - minX);
+   return res;
+}
+
+private static int getLimitation(int[][] image, boolean isRow, boolean lowerBound, int i, int j, int low, int high) {
+   //terminal condition
+   while (i < j) {
+       //定位mid和边界坐标
+       int k = low;
+       int mid = i + (j - i) / 2;
+       while (k < high && (isRow ? image[mid][k] : image[k][mid]) == 0) {
+           k++;
+       }
+       //下面分析跳出while循环的几种可能性
+       //case1: reverse;
+       //case 1.1: 越界了，那么都是0，需要向下找
+       //case 1.2: 还未触底边界，但是碰到1了，向上找
+       //case2：not reverse
+       //case 2.1: 越界了，那么都是0，需要向上找
+       //case 2.2: 还未触底边界，但是碰到1了，向下找
+       if (lowerBound) {
+           if (k >= high) {
+               i = mid + 1;
+           } else {
+               j = mid;
+           }
+       } else {
+           if (k >= high) {
+               j = mid;
+           } else {
+               i = mid + 1;
+           }
+       }
+   }
+   return i;
+ }
+}
+
+
+6. Longest Ascending Subsequence
+
+Find the length of longest ascending subsequence in the array;
+Approach: Binary Search(nlogn)
+/*
+High level:
+1D - DP
+only use one array to store the current maxLength Longest Ascending Subsequence(LAS) and its ending value; dynamically update the length of current LAS and always maintained the smaller ending element.
+int[] DP = new int[array.length + 1];
+int max = 1;
+//base case:
+DP[1] = array[0];
+//induction rule:
+linear scan from index 1 to index == array.length - 1;
+binary Search to find the largest smaller than array[i];
+two cases:
+find index == max  -> it is time to update the max 
+find otherwise: index < max  update the index + 1 element with array[i];
+*/
+
+public class LongestAscendingSubsequence {
+   public static void main(String[] args) {
+       int[] array = {9,32,16,21,21,18,14,19,32,11,13};
+       System.out.println(getLongestAscendingSubsequence(array));
+   }
+
+   private static int getLongestAscendingSubsequence(int[] array) {
+       if (array == null || array.length == 0) {
+           return 0;
+       }
+       int[] DP = new int[array.length + 1];
+       int max = 1;
+       DP[1] = array[0];
+       for (int i = 1; i < array.length; i++) {
+           int target = array[i];
+           int index = binarySearch(DP, 1, max, target);
+           //Two cases:
+           //1. find an element in DP array and the index is the same as current result, so update DP and update Max;
+           //2. find an element in DP array and its index which is smaller than current target so update next index;
+           if (index == max) {
+               DP[++max] = array[i];
+           } else {
+               DP[index + 1] = array[i];
+           }
+       }
+       return max;
+   }
+
+   private static int binarySearch(int[] DP, int left, int right, int target) {
+       //find the largest smaller one
+       while (left < right - 1) {
+           int mid = left + (right - left) / 2;
+           if (DP[mid] < target) {
+               left = mid;
+           } else {
+               right = mid - 1;
+           }
+       }
+       //post processing
+       if (DP[right] < target) {
+           return right;
+       } else if (DP[left] < target) {
+           return left;
+       }
+       //means no existing element is smaller than this one, so returned index == 0;
+       return 0;
+   }
+}
+
+
+
