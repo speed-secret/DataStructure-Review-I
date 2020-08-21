@@ -1,0 +1,533 @@
+LinkedList
+Very Interesting topic, each listNode could have different field;
+not support O(1) random access, but ArrayList could be generally used in many situation.
+
+1. Reverse linkedList(Iterative && Recursively)
+/*
+High level:
+Iterative
+would use ListNode prev to represent the previous element;
+Iterative switch the listNode point to previous one
+do it until traverse the final listNode
+
+Recursion:
+recursively find the last node in the linkedList
+and change the direction from rightMost to leftMost
+and return newHead;
+*/
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+public class Solution {
+ public ListNode reverse(ListNode head) {
+   //recursion T: O(n) S: O(n) -> call stack
+  /* if (head == null || head.next == null) {
+     return head;
+     }
+     ListNode newHead = reverse(head.next);
+     head.next.next = head;
+     head.next = null;
+     return newHead;
+ }
+ */
+ //iterative T: O(n) S : O(1);
+ ListNode prev = null;
+ while(head != null){
+   ListNode next = head.next;
+   head.next = prev;
+   prev = head;
+   head = next;
+ }
+ return prev;
+}
+ /*
+ ListNode prev = null;
+ while (head != null){
+   ListNode Next = head.next;
+   //发生发转的地方；
+   head.next = prev;
+   prev = head;
+   //head 往后移动一位；
+   head = Next;
+ }
+ return prev;
+ }
+ */
+}
+ 
+Reverse LinkedList (recursively)
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+public class Solution {
+ public ListNode reverse(ListNode head) {
+   if (head == null || head.next == null) {
+     return head;
+   }
+   ListNode newHead = reverse(head.next);
+   head.next.next = head;
+   head.next = null;
+   return newHead;
+ }
+}
+ 
+ 
+2. Middle Node of LinkedList
+/*
+Find middle, use two listNode pointers
+Slow and Fast;
+*/
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+public class Solution {
+ public ListNode middleNode(ListNode head) {
+   if (head == null || head.next == null) {
+     return head;
+   }
+   ListNode slow = head;
+   ListNode fast = head;
+   while (fast.next != null && fast.next.next != null) {
+     slow = slow.next;
+     fast = fast.next.next;
+   }
+   return slow;
+ }
+}
+ 
+ 
+3. Check if linkedList has a cycle
+/*
+Use two listNode pointers
+Slow and Fast;
+if it does have a cycle, the slow index and
+fast index must overlapped
+*/
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+public class Solution {
+ public boolean hasCycle(ListNode head) {
+   if(head == null || head.next == null){
+       return false;
+   }
+   ListNode slow = head;
+   ListNode fast = head;
+   while(fast.next != null && fast.next.next != null){
+       slow = slow.next;
+       fast = fast.next.next;
+     if (slow == fast) {
+       return true;
+     }
+   }
+   return false;
+ }
+}
+ 
+4.Insert in sorted linkedList
+/*
+Use dummy node, because we don't really know what exaclty listNode can be inserted
+into, for example if we need inseart the new Node in the beginning at the list
+then we can use dummy.next to represent the new Node;
+*/
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+public class Solution {
+ public ListNode insert(ListNode head, int value) {
+ ListNode cur = new ListNode(0);
+    ListNode dummy = cur;
+    //case 1:head == null -> return new ListNode(value)
+    //case 2:head.value > value -> new ListNode(value).next = head;
+    //case 3:put the newListNode(value) in one of the listNode;
+    if (head == null) {
+      return new ListNode(value);
+    }
+    if (head.value > value) {
+      ListNode newNode = new ListNode(value);
+      newNode.next = head;
+      cur.next = newNode;
+    } else {
+      cur.next = head;
+      cur = cur.next;
+      head = head.next;
+      while (head != null && head.value <= value) {
+        cur.next = head;
+        cur = cur.next;
+        head = head.next;
+      }
+      cur.next = new ListNode(value);
+      cur.next.next = head;
+    }
+    return dummy.next;
+ }
+}
+/*
+//insert a node in a sorted LinkedList
+public ListNode insert(ListNode head, int value){
+ ListNode newHead = new ListNode(value);
+ if (head == null ||head.value <= value){
+     newHead.next = head;
+     return newHead;
+ }
+  ListNode cur = head;
+ while(cur.next != null && cur.next.value < value){
+   cur = cur.next;
+ }
+  newHead.next = cur.next;
+ cur.next = newHead;
+ return head;
+}
+*/
+ 
+5. Merge Two sorted LinkedList
+/*
+High level:
+谁小移动谁；
+和reOrder的那个最后一步也非常相似，
+只是这里跳出循环之后既有可能到达list one的底儿
+也有可能到达list two的底儿，要做两个判断；
+*/
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+public class Solution {
+ public ListNode merge(ListNode one, ListNode two) {
+    ListNode dummy = new ListNode(0); //我理解是不是重新构造了一个ListNode，然后初始位置0时，放dummy，curr；
+    ListNode curr = dummy;
+    while(one != null && two != null){
+        if(one.value < two.value){
+            curr.next = one;
+            one = one.next;
+        } else{
+            curr.next = two;
+            two = two.next;
+        }
+        curr = curr.next;
+    }
+    if(one == null){
+        curr.next = two;
+    } else {
+        curr.next = one;
+    }
+    return dummy.next;
+ }
+}
+ 
+6.ReOrder LinkedList
+/*
+找中点
+打断
+重新merge Two linkedList
+（注意：第一个list的长度永远比第二个短或者相等）
+*/
+public class Solution {
+ public ListNode reorder(ListNode head) {
+   if (head == null || head.next == null) {
+     return head;
+   }
+   ListNode mid = middle(head);
+   ListNode two = reverse(mid.next); //这行和99行顺序还真就不能颠倒啦！
+   //记得要打断；
+   mid.next = null;
+   return merge(head, two);
+ }
+ 
+ private ListNode middle(ListNode head) {
+   ListNode slow = head;
+   ListNode fast = head;
+   while(fast.next != null && fast.next.next != null) {
+     slow = slow.next;
+     fast = fast.next.next;
+   }
+   return slow;
+ }
+ 
+ private ListNode reverse(ListNode head) {
+   if (head == null || head.next == null) {
+     return head;
+   }
+   ListNode newHead = reverse(head.next);
+   head.next.next = head;
+   head.next = null;
+   return newHead;
+ }
+ 
+ private ListNode merge(ListNode one, ListNode two) {
+   ListNode dummy = new ListNode(0); //为什么要新建一个数组，而不能用我自己的方法？
+                                     //答曰：pass by value!!
+   ListNode cur = dummy;
+   while(one != null && two != null){
+     cur.next = one;
+     one = one.next;
+     cur.next.next = two;
+     two = two.next;
+     cur = cur.next.next;
+   }
+   if(two == null){
+     cur.next = one;
+   }
+   return dummy.next;
+ }
+ 
+7.Partition LinkedList
+/*
+Use two dummy nodes which represent small and large
+remember to cut the tail!
+*/
+7.Partition LinkedList
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+/*
+public class Solution { //pass by value; two dummy nodes; 画画图搞搞清楚！
+                       //通过两个dummy head 构建两个链条；
+                       //通过linear scan把他们分清楚
+ public ListNode partition(ListNode head, int target) {
+   ListNode dummy1 = new ListNode(0);
+   ListNode dummy2 = new ListNode(0);
+   ListNode small = dummy1;
+   ListNode large = dummy2;
+   while (head != null) {
+     if (head.value < target) {
+       small.next = head;
+       small = small.next;
+     } else {
+       large.next = head;
+       large = large.next;
+     }
+       head = head.next;
+   }
+   small.next = dummy2.next;
+   large.next = null;
+   return dummy1.next;
+ }
+}
+*/
+ 
+public class Solution {
+ public ListNode partition(ListNode head, int target) {
+   if (head == null || head.next == null) {
+     return head;
+   }
+   ListNode dummy1 = new ListNode(0);
+   ListNode dummy2 = new ListNode(0);
+   ListNode small = dummy1;
+   ListNode large = dummy2;
+   while(head != null){
+     if (head.value < target){
+       small.next = head;
+       small = small.next;
+     } else {
+       large.next = head;
+       large = large.next;
+     }
+     head = head.next;
+   }
+   small.next = dummy2.next;
+   large.next = null;
+   return dummy1.next;
+ }
+}
+ 
+8.MergeSort linkedList
+/*
+High level：
+核心在于构造最新的两个ListNode one and ListNode two;
+然后打断并找到相对应的第一个ListNode和第二个ListNode
+然后recursion的来做
+
+ListNode mid = findMiddle(head);
+ListNode midNext = mid.next;
+mid.next = null;
+ListNode one = mergeSort(head);
+ListNode two = mergeSort(midNext);
+return merge(one, two);
+
+
+9.Add Two number
+/*High level:
+use an int variable val to store the current left;
+iterative check two sum with two lists;
+terminate it if one && two are all null
+and if the val is 0;
+
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+public class Solution {
+ public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+   //Assume l1, l2 were not null;
+   //题意就是一个个加起来，然后只保留个位上的数字，
+   //十位上的数字保留但作为个位数存在后一个位置中，等待后续累进
+   ListNode dummy = new ListNode(0);
+   ListNode cur = dummy;
+   int val = 0;
+   while(l1 != null || l2 != null || val != 0){
+     if (l1 != null){
+       val += l1.value;
+       l1 = l1.next;
+     }
+     if (l2 != null) {
+       val += l2.value;
+       l2 = l2.next;
+     }
+     cur.next = new ListNode(val % 10);
+     val = val / 10;
+     cur = cur.next;
+   }
+   return dummy.next;
+ }
+}
+ 
+10.Check if linkedList is palindrome
+/*High level:
+找中点，然后两个指针同时走，这个比较直观；
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+//T: O(n);
+//S: O(n)
+public class Solution {
+ public boolean isPalindrome(ListNode head) {
+   //在分析了如何使用或者说规避space O（1）这个条件之后，还是决定抓一个中间数，抓一个middle node
+   //在此基础上，对于下半个list进行反转；然后在while循环里面逐个比较！
+   if (head == null || head.next == null) {
+     return true;
+   }
+   ListNode mid = findMiddle(head);
+   ListNode right = reverse(mid.next);
+   return match(head, right);
+ }
+ 
+ private boolean match(ListNode one, ListNode two){
+    while (two != null) {
+     if (one.value != two.value) {
+       return false;
+     }
+     one = one.next;
+     two = two.next;
+   }
+   return true;
+ }
+ 
+ private ListNode findMiddle(ListNode head) {
+   ListNode slow = head;
+   ListNode fast = head;
+   while (fast.next != null && fast.next.next != null) {
+     slow = slow.next;
+     fast = fast.next.next;
+   }
+   return slow;
+ }
+ 
+ private ListNode reverse(ListNode head) {
+   if (head == null || head.next == null) {
+     return head;
+   }
+   ListNode newHead = reverse(head.next);
+   head.next.next = head;
+   head.next = null;
+   return newHead;
+ }
+}
+
+11. Remove LinkedList element
+/*Use dummy Node
+//remove elements that matched the target
+//then reconnected it
+/**
+* class ListNode {
+*   public int value;
+*   public ListNode next;
+*   public ListNode(int value) {
+*     this.value = value;
+*     next = null;
+*   }
+* }
+*/
+//Assume the ListNode is not null;
+//T: O(n);
+//S: O(n);
+public class Solution {
+ public ListNode removeElements(ListNode head, int val) {
+   //dummy head 一用上之后呢，就能够另辟新头；
+   //把所有不属于target的node 置之不理；
+   //然后用cur pointer接上一点点儿的接起来了；
+   ListNode dummy = new ListNode(0);
+   ListNode cur = dummy;
+   while (head != null){
+     if (head.value != val) {
+       cur.next = head;
+       cur = cur.next;
+     }
+     head = head.next;
+   }
+   cur.next = null;
+   return dummy.next;
+ }
+}
+ 
