@@ -1,5 +1,274 @@
-Queue
- 
-use two queues to sort an array into a sorted ascending order array;
+Implement a Queue
 
-//mindset:
+/*
+对比思考：
+Queue为啥需要两个指针head & tail
+因为它吐出去和吃进来刚好发生在两端
+所以一个pointer满足不了API的需求
+因此需要两个指针————head & tail
+
+→ 一句话总结：尾进头出，
+首先对head进行null讨论，然后看如果是剩一个的情况也要更新tail, 必须要对tail有个交代
+继续上图：
+case 1:
+head
+tail
+null;
+
+case 2:
+head
+tail -> null;
+
+case 3:
+head -> ... -> tail -> null;
+*/
+
+public class ImplementQueueViaLinkedList {
+   ListNode head;
+   ListNode tail;
+
+   public void offer(int ele) {
+       if (head == null) {
+           head = new ListNode(ele);
+           tail = head;
+       } else {
+           tail.next = new ListNode(ele);
+           tail = tail.next;
+       }
+   }
+
+   public Integer poll() {
+       if (head == null) {
+           return null;
+       }
+       ListNode res = head;
+       head = head.next;
+       //********important*********
+       if (head == null) {
+           tail = tail.next;
+       }
+       res.next = null;
+       //掐头去尾，要对拿出来的node有交代，别把尾巴也都带出来了
+       //********important*********
+       return res.val;
+   }
+
+   public Integer peek() {
+       if (head == null) {
+           return null;
+       }
+       return head.val;
+   }
+}
+
+
+package QueueAndStack;
+
+同理思考：
+对于用array来实现的Queue也需要两个错开的指针
+head & tail
+然后不断去维护它们；最后让他们服务好API的调用；
+
+注意：tail = (tail + 1)% array.length;
+        head = (head + 1) % array.length;
+
+public class ImplementQueueViaBoundedArray {
+   int head = 0;
+   int tail = 1;
+   int[] array;
+   final int CAPACITY = 11;
+   int size = 0;
+   public ImplementQueueViaBoundedArray() {
+       array = new int[CAPACITY];
+   }
+
+   /*
+   offer(int ele); poll(); peek();
+                  head
+    tail
+   [_,   ,   ,  _,  3]
+    */
+Offer 移动的是tail；所以拿（第一个）东西在判断的时候，先判断是否有，然后再抓对应的element
+poll 移动的是head；
+要注意size的增减变化；
+   public boolean offer(int ele) {
+       if (size == array.length) {
+           return false;
+       }
+       array[tail] = ele;
+       tail = tail + 1 == array.length ? 0 : tail + 1;
+       size++;
+       return true;
+   }
+
+   public Integer poll() {
+       if (size == 0) {
+           return null;
+       }
+       int res = array[head + 1];
+       head = head + 1 == array.length ? 0 : head + 1;
+       size--;
+       return res;
+   }
+
+   public Integer peek() {
+       if (size == 0) {
+           return null;
+       }
+       return array[head + 1];
+   }
+
+   public int size() {
+       return size;
+   }
+
+   public boolean isEmpty() {
+       return size == 0;
+   }
+
+   public boolean isFull() {
+       return size == array.length;
+   }
+
+   public static void main(String[] args) {
+       ImplementQueueViaBoundedArray queue = new ImplementQueueViaBoundedArray();
+       System.out.println(queue.offer(3));
+       System.out.println(queue.peek());
+       System.out.println(queue.offer(9));
+       System.out.println(queue.poll());
+       System.out.println(queue.poll());
+   }
+}
+
+Also, we can implement a Stack by using array / linkedList
+Stack:
+package QueueAndStack;
+
+class ListNode{
+   ListNode next;
+   int val;
+   public ListNode(int val) {
+       this.val = val;
+   }
+}
+
+/*
+首先思考：
+为什么一个指针head 就可以了
+因为它只需要那头顶那个元素就好，然后不要失去对于头的控制
+刚好这两个条件都只需要一个指针head 就能够满足了；
+
+直接上图：
+head -> one -> ... -> null;
+
+attention to:
+poll()
+use LinkedList prev pointer as a bridge to record the current head
+replace the current head by pointing to its next one
+then cut the tail of prev pointer and return the value;
+*/
+
+public class ImplementStackViaLinkedList {
+   ListNode head;
+   public ImplementStackViaLinkedList() {
+       head = null;
+   }
+
+   public void offer(int ele) {
+       ListNode newHead = new ListNode(ele);
+       newHead.next = head;
+       head = newHead;
+   }
+
+   public Integer poll() {
+       if (head == null) {
+           return null;
+       }
+       ListNode prev = head;
+       head = head.next;
+       prev.next = null;
+       return prev.val;
+   }
+
+   public Integer peek() {
+       if (head == null) {
+           return null;
+       }
+       return head.val;
+   }
+}
+
+
+
+package QueueAndStack;
+
+/*
+use an array to implement the stack;
+with an extra head pointer;
+*/
+
+public class ImplementStackViaBoundedArray {
+   int[] array;
+   int head;
+   final int CAPACITY = 11;
+
+   public ImplementStackViaBoundedArray() {
+       array = new int[CAPACITY];
+       head = -1;
+   }
+
+   public boolean offer(int ele) {
+       //check if the array is full
+       //assume the size of the array can not be changed
+       if (head == array.length - 1) {
+           return false;
+       }
+       array[++head] = ele;
+       return true;
+   }
+
+   public Integer pop() {
+       return head == -1 ? null : array[head--];
+   }
+
+   public Integer top() {
+       return head == -1 ? null : array[head];
+   }
+}
+
+
+Summary:
+*/
+1. 当用Linked List去实现stack 的时候只需要一个ListNode head即可
+不过在调用poll()这个API的时候，需要新建一个ListNode prev作为bridge去记录老的
+head，然后经过替换，去尾等操作再返回老的值；
+
+2.实现Queue的时候，需要两个Nodes-> head & tail
+处理的时候要分两种情况：
+case1: head == null
+case2: head == tail && head != null; 这种情况尤其需要注意，因为如果拿走一个元素
+那么就要把头尾两个元素都要更新了
+if (head == null) {
+	tail == tail.next;
+}
+
+3.使用bounded array 的时候要注意设置head/tail的起始位置，后续维护好它们的关系即可
+eg: Queue: index of head: 0 index of tail: 1; 
+eg: Stack: index of head: - 1;
+
+4.对于更新head & tail,
+note:
+head = head + 1 == array.length ? 0 : head + 1;
+tail = tail + 1 == array.length ? 0 : tail + 1;
+
+5.如何判断array是否已满/空？
+A.set head = 0; tail = 1
+ head + 1 == tail     -> empty  
+ head == tail         ->full 因为head = head + 1 == array.length ? 0 : head + 1;
+
+B.use int variable size
+ size == 0            -> empty
+ size == array.length ->full
+*/
+
+
