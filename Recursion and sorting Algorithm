@@ -1,0 +1,281 @@
+Recursion And Sorting Algorithm I
+
+Fibonacci Number
+https://app.laicode.io/app/problem/624
+//High level:
+//it is actually a simple version of DP
+//because the element can be recorded to form the next result;
+public class Solution {
+ public int fibonacci(int K) {
+   if (K <= 0) {
+     return 0;
+   }
+   int a = 0;
+   int b = 1;
+   while (K > 1) {
+     int temp = a + b;
+     a = b;
+     b = temp;
+     K--;
+   }
+   return b;
+ }
+}
+ 
+To the Power of B
+https://app.laicode.io/app/problem/13
+//High level:
+//Use recursion to calculate its half size of b
+//and boil down until hit the base case
+
+public class Solution {
+ public long power(int a, int b) {
+   if (b == 0){
+     return 1;
+   }
+   //a = 3
+   //b = 2
+   long half = power(a, b / 2);
+   return b % 2 == 0 ? half * half : half * half * a;
+ }
+}
+ 
+Sorting Algorithm:
+Selection Sort
+//High level:
+//use O(n^2) time complexity:
+//in the outer loop i from leftMost to rightMost - 1;
+//and in the inner loop from i + 1 to rightMost; 
+//in each circle, shall we find the current minimum element and put it into the i position
+https://app.laicode.io/app/problem/4
+public class Solution {
+ public int[] solve(int[] array) {
+   //there are just one array
+   //check the corner case first
+   if(array == null || array.length == 0){
+     return array;
+   }
+   //the basic solution for this question is all about using two for loops
+   //so for the outer loop I can linear scan from the lefthandside to the right
+   //the inner loop is from its orginal pointer to the end
+   //And I really need to maintain a globalMin so I can put it into the
+   //end of the array;
+   for(int i = 0; i < array.length - 1; i++){
+     int globalMin = i;
+     for(int j = i + 1; j < array.length; j++){
+       if(array[j] < array[globalMin]){
+         globalMin = j;
+       }
+     }
+     swap(array, globalMin, i);
+   }
+   return array;
+ }
+ 
+ private void swap(int[] array, int left, int right){
+   int temp = array[left];
+   array[left] = array[right];
+   array[right] = temp;
+ }
+}
+ 
+/*
+public class Solution {
+ public int[] solve(int[] array) {
+   if (array == null || array.length == 0) {
+     return array;
+   }
+   for(int i = 0; i < array.length - 1; i++){
+     int globalMin = i;
+     for(int j = i + 1; i < array.length; j++){
+       if(array[j] < array[globalMin]){
+         globalMin = j;
+       }
+     }
+     swap(array, globalMin, i);
+   }
+   return array;
+ }
+}
+*/
+ 
+Merge Sort
+//High level:
+//Use a helper function and deepcopy the elements in the array;
+//divide the array into two parts and until only one elements left, jump back to the higher level and merge the left and right parts
+//in the merge process:
+//traverse the helper array to put the smaller one into the leftHand side and put the larger one to the rightHand side;
+//until we merge all the arrays shall we return it;
+https://app.laicode.io/app/problem/9
+ 
+public class Solution {
+ public int[] mergeSort(int[] array) {
+  if(array == null || array.length == 0){
+    return array;
+  }
+  int[] helper = new int[array.length];
+  mergeSort(array, helper, 0, array.length - 1);
+  return array;
+ }
+  
+private void mergeSort(int[] array, int[] helper, int left, int right){
+  //base case:
+  if(left >= right){
+    return;
+  }
+  int mid = left + (right - left) / 2;
+  mergeSort(array, helper, left, mid);
+  mergeSort(array, helper, mid + 1, right);
+  merge(array, helper, left, mid, right);
+}
+  
+private void merge(int[] array, int[] helper, int left, int mid, int right){
+  for(int i = left; i <= right; i++){
+    helper[i] = array[i];
+  }
+  int leftIndex = left;
+  int rightIndex = mid + 1;
+  while(leftIndex <= mid && rightIndex <= right){
+    if(helper[leftIndex] <= helper[rightIndex]){
+      array[left++] = helper[leftIndex++];
+    } else{
+      array[left++] = helper[rightIndex++];
+    }
+  }
+  while(leftIndex <= mid){
+    array[left++] = helper[leftIndex++];
+  }
+}
+ /*
+ 
+   //helper作为一个中间商，负责copy and paste的工作
+   int[] helper = new int[array.length];
+   mergeSort(array, helper, 0, array.length - 1);
+   return array;
+ }
+  private void mergeSort(int[] array, int[] helper, int left, int right){
+   if(left >= right){
+       return;
+   }
+   int mid = left + (right - left) / 2;
+   mergeSort(array, helper, left, mid);
+   mergeSort(array, helper, mid + 1, right);
+   merge(array, helper, left, mid, right);
+ }
+  private void merge(int[] array, int[] helper, int left, int mid, int right){
+   for(int i = left; i <= array.length - 1; i++){
+       helper[i] = array[i];
+   }
+   int leftIndex = left;
+   int rightIndex = mid + 1;
+   while(leftIndex <= mid && rightIndex <= right){
+      if(helper[leftIndex] <= helper[rightIndex]){
+        array[left++] = helper[leftIndex++];
+      }else {
+        array[left++] = helper[rightIndex++];
+      }
+   }
+   while(leftIndex <= mid){
+     array[left++] = helper[leftIndex++];
+   }
+ }
+}
+*/
+ }
+ 
+ 
+Quick Sort
+//find a pivot
+//and put all elements smaller than pivot into the left area of pivot and put all elements
+//larger than pviot into the right area of the pivot;
+//divide the whole array into left hand side part and right hand side part
+//then repeat the operation of finding pivot and reconstruct the array
+//until the size of leftPart equals to 1;
+//until the size of rightPart equals to 1;
+https://app.laicode.io/app/problem/10
+public class Solution {
+ public int[] quickSort(int[] array) {
+   if (array == null || array.length == 0){
+     return array;
+   }
+   quickSort(array, 0, array.length - 1);
+   return array;
+ }
+ 
+ private void quickSort(int[] array, int left, int right){
+   //base case
+   if(left >= right){
+     return;
+   }
+   //get the index of pivotFirst
+   //then we divided it into two parts
+   int pivotPos = partition(array, left, right);
+   quickSort(array, left, pivotPos - 1);
+   quickSort(array, pivotPos + 1, right);
+ }
+ 
+ private int partition(int[] array, int left, int right){
+   int index = getIndex(left, right);
+   int pivot = array[index];
+   swap(array, index, right);
+   int i = left;
+   int j = right - 1;
+   while(i <= j){
+     if(array[i] < pivot){
+       i++;
+     } else if(array[j] > pivot){
+       j--;
+     } else{
+       swap(array, i++, j--);
+     }
+   }
+   swap(array, i, right);
+   return i;
+ }
+ 
+ private int getIndex(int left, int right){
+   return left + (int)(Math.random() * (right - left + 1));
+ }
+ 
+ private void swap(int[] array, int left, int right){
+   int temp = array[left];
+   array[left] = array[right];
+   array[right] = temp;
+ }
+}
+*/
+RainBow Sort
+//High level:
+//use 3 pivots i,j,k and divide the array into 4 different areas
+//the [0,i) which represent -1;
+//the [i, j) which represent 0;
+//the [j, k] which represent we current need to deal with it;
+//the (k, array.length - 1] which represent 1;
+https://app.laicode.io/app/problem/11
+public class Solution {
+ public int[] rainbowSort(int[] array) {
+   //物理意义明确了之后就好搞了！！
+   if(array.length == 0){
+     return array;
+   }
+   int i = 0;
+   int j = 0;
+   int k = array.length - 1;
+   while(j <= k){
+     if(array[j] == -1){
+       swap(array, i++, j++);
+     } else if(array[j] == 0){
+       j++;
+     } else if(array[j] == 1){
+       swap(array, j, k--);
+     }
+   }
+   return array;
+ }
+ 
+ private void swap(int[] array, int left, int right){
+   int temp = array[left];
+   array[left] = array[right];
+   array[right] = temp;
+ }
+}
